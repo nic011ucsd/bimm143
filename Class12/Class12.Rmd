@@ -44,6 +44,24 @@ pdb <- read.pdb("1hsg")
 pdb
 ```
 
+##Select protein only atoms 
+use `atom.select`
+
+```{r}
+prot <- atom.select(pdb, "protein", value=TRUE)
+lig <- atom.select(pdb, "ligand", value=TRUE)
+
+```
+
+And write out these new PDB objects with the `write.pdb()` function.
+
+```{r}
+write.pdb(lig, file="1hsg_ligand.pdb")
+write.pdb(prot, file="1hsg_protein.pdb")
+#PDB files are now in the folder
+```
+
+
 ```{r}
 attributes(pdb)
 ```
@@ -51,4 +69,3 @@ attributes(pdb)
 ```{r}
 pdb$atom
 ```
-
