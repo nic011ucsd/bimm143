@@ -25,7 +25,7 @@ file.name <- get.pdb("1hsg")
 pdb <- read.pdb(file.name)
 pdb
 ```
-test
+
 Select Protein only
 ```{r}
 prot <- atom.select(pdb, "protein", value=TRUE)
