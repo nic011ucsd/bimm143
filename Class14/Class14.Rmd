@@ -11,9 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(DESeq2)
 ```
 
+#import data
 ```{r}
-counts <- read.csv("/Users/nicholaschen/Desktop/UCSD course/BIMM 143/bimm143_github/Class14/airway_scaledcounts.csv", stringsAsFactors = FALSE)
-metadata <-  read.csv("/Users/nicholaschen/Desktop/UCSD course/BIMM 143/bimm143_github/Class14/airway_metadata.csv", stringsAsFactors = FALSE)
+counts <- read.csv("airway_scaledcounts.csv", stringsAsFactors = FALSE)
+metadata <-  read.csv("airway_metadata.csv", stringsAsFactors = FALSE)
 ```
 
 ```{r}
@@ -21,7 +22,111 @@ head(counts)
 head(metadata)
 ```
 
+How many genes are we dealing with
 ```{r}
-View(metadata)
+nrow(counts)
+```
+
+We want to calculate the average counts per gene for control samples and for the drug treated samples. We will then compare these values to see if there is a difference overall between control and treated samples for a given gene.
+
+1.Select *control* sample in metadata (column,)
+```{r}
+control <- metadata[metadata$dex=="control",]
+control
+```
+2.match the control$id in 'metadata' to the 'counts' and average it (,row)
+```{r}
+counts[ ,control$id]
+control.mean <- rowSums( counts[ ,control$id] ) / nrow(control)
+```
+
+Now let's do the *treated* sample
+```{r}
+treated <- metadata[metadata$dex=="treated",]
+treated
+counts[ ,treated$id]
+treated.mean <- rowSums( counts[ ,treated$id] ) / nrow(treated)
+
+```
+
+We will combine our meancount data fpr bookkeeping purposes
+```{r}
+meancounts <- data.frame(control.mean, treated.mean)
+head(meancounts)
+```
+
+Lets plot control.mean vs. treated.mean
+```{r}
+plot(meancounts)
+```
+
+Make a log-log plot
+```{r}
+plot(meancounts, log="xy")
+```
+
+
+Calculate log2foldchange, add it to our meancounts dataframe
+```{r}
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+head(meancounts)
+```
+There are a couple of “weird” results. Namely, the NaN (“not a number”“) and -Inf (negative infinity) results.
+
+Remove any gene that has zero average counts
+```{r}
+x <- c(1,1,10,0)
+x==0
+which(x==0) #tells you the 4th is 0
+```
+
+```{r}
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+
+to.rm <- unique(zero.vals[,1])
+mycounts <- meancounts[-to.rm,]
+head(mycounts)
+```
+
+How many genes do I have left
+```{r}
+nrow(mycounts)
+```
+
+A common threshold used for calling something differentially expressed is a log2(FoldChange) of greater than 2 or less than -2. Let’s filter the dataset both ways to see how many genes are up or down-regulated.
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+```
+
+```{r}
+sum(up.ind)
+sum(down.ind)
+```
+
+
+
+##Do this properly with DESeq2
+
+```{r}
+library(DESeq2)
+```
+
+Setup input for DESeq by specifying countdata, metadata, and the experiment design
+(i.e. which comparasions we are interested in)
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+dds
+```
+
+```{r}
+dds <- DESeq(dds)
+```
+
+```{r}
+results(dds)
 ```
 
