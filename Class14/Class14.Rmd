@@ -127,6 +127,23 @@ dds <- DESeq(dds)
 ```
 
 ```{r}
-results(dds)
+res <- results(dds)
+```
+
+```{r}
+plot(res$log2FoldChange, log(res$padj))
+```
+
+Lets plot this up side down (add - )
+```{r}
+plot(res$log2FoldChange, -log(res$padj))
+```
+
+```{r}
+mycols <- rep("gray", nrow(res))
+mycols[ res$log2FoldChange >2] <- "blue"
+mycols[ res$log2FoldChange <2] <- "blue"
+
+plot(res$log2FoldChange, -log(res$padj), col=mycols)
 ```
 
