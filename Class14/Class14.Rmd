@@ -1,0 +1,27 @@
+---
+title: "Class14/15: Transcriptomics and the analysis of RNA-Seq data"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(DESeq2)
+```
+
+```{r}
+counts <- read.csv("/Users/nicholaschen/Desktop/UCSD course/BIMM 143/bimm143_github/Class14/airway_scaledcounts.csv", stringsAsFactors = FALSE)
+metadata <-  read.csv("/Users/nicholaschen/Desktop/UCSD course/BIMM 143/bimm143_github/Class14/airway_metadata.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+head(counts)
+head(metadata)
+```
+
+```{r}
+View(metadata)
+```
+

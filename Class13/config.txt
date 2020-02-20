@@ -13,3 +13,5 @@ size_y = 30
 size_z = 30
 
 seed = 2009
+
+#/Downloads/autodock_vina_1_1_2_mac_catalina_64bit/bin/vina --help
