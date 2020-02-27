@@ -119,3 +119,61 @@ res$symbol = mapIds(org.Hs.eg.db,
 head(res)
 ```
 
+
+Now we have our geneIDs in the correct format we can do pathway analysis
+
+#Pathway Analysis
+
+Here we are going to use the gage package for pathway analysis. Once we have a list of enriched pathways, we're going to use the pathview package to draw pathway diagrams, shading the molecules in the pathway by their degree of up/down-regulation.
+
+First I need to install the package I need
+
+```{r}
+#BiocManager::install( c("pathview", "gage", "gageData") )
+library(pathview)
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+Make a input vector of our numeric quantity of interest i.e. fold change values and make sure it has ENTREZ gene name associated with it.
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+Now run **gage** with this input vector and our KEGG genesets
+```{r}
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+What is in our result? We can use the `attributes()` function to see what is returned here.
+
+```{r}
+attributes(keggres)
+```
+
+
+```{r}
+# Look at the first few down (less) pathways
+head(keggres$less)
+
+```
+
+We use the KEGG pathway ID from our top hit along with our `foldchange` vector to view our results as a more useful figure.
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+![hsa04110.pathview.png]()
