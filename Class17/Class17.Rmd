@@ -1,0 +1,84 @@
+---
+title: "Class17"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Setup
+First setup the packages we need. These include **igraph** from CRAN and **RCy3** from bioconductor. **install.packages("igraph")** and **BiocManager::install("RCy3")**
+
+```{r}
+library(RCy3)
+library(igraph)
+```
+
+Let's check we can talk to cytoscape from R. Note that cytoscape must be running at this point.
+```{r}
+cytoscapePing()
+```
+
+
+We can test things further by making a small network (here in igraph format as used by the R igraph package) and sending it to Cytoscape:
+```{r}
+g <- makeSimpleIgraph()
+createNetworkFromIgraph(g,"myGraph")
+```
+
+```{r}
+setVisualStyle("Universe")
+```
+
+
+```{r}
+## scripts for processing located in "inst/data-raw/"
+prok_vir_cor <- read.delim("virus_prok_cor_abundant.tsv", stringsAsFactors = FALSE)
+
+## Have a peak at the first 6 rows
+head(prok_vir_cor)
+
+```
+
+
+How many connections (i.e. edges) will we have in our network - lets look at the number of rows
+```{r}
+nrow(prok_vir_cor)
+```
+
+```{r}
+g <- graph.data.frame(prok_vir_cor, directed = FALSE)
+```
+
+```{r}
+class(g)
+```
+
+```{r}
+plot(g)
+plot(g, vertex.size=3, vertex.label=NA)
+```
+
+
+##Network community detection
+
+Lets cluster our network to find
+
+Community structure detection algorithms try to find dense sub-graphs within larger network graphs (i.e. clusters of well connected nodes that are densely connected themselves but sparsely connected to other nodes outside the cluster) . Here we use the classic Girvan & Newman betweenness clustering method. The igraph package has lots of different community detection algorithms (i.e. different methods for finding communities).
+
+
+```{r}
+cb <- cluster_edge_betweenness(g)
+
+plot(cb, y=g, vertex.label=NA,  vertex.size=3)
+```
+
+```{r}
+pr <- page_rank(g)
+head(pr$vector)
+
+v.size <- BBmisc::normalize(pr$vector, range=c(2,20), method="range")
+plot(g, vertex.size=v.size, vertex.label=NA)
+```
+
