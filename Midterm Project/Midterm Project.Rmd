@@ -1,0 +1,37 @@
+---
+title: "Midterm Project"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read alignment file
+```{r}
+library(bio3d)
+
+SHH <- read.fasta("SHH alignment")
+```
+
+Sequence identity matrix
+Percent Identity
+```{r}
+matrix <- seqidentity(SHH, normalize=TRUE, similarity=FALSE, ncore=1, nseg.scale=1)
+```
+
+Generate a heatmap
+```{r}
+heatmap <- heatmap(matrix)
+```
+
+Q8: search the main protein structure database for the most similar atomic resolution structures to your aligned sequences. 
+```{r}
+Consensus <- consensus(SHH)
+Consensus
+```
+
+```{r}
+
+```
+
