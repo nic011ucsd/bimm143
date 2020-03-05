@@ -62,3 +62,78 @@ plotmafSummary(vars)
 oncoplot(maf = vars, top = 10)
 ```
 
+We can make oncoplots for a specific gene too...
+```{r}
+lollipopPlot(vars, gene='TP53')
+```
+
+
+
+
+
+# Part 2. Designing a personalized cancer vaccine
+
+The following sequences resulted from an NGS analysis of patient healthy and tumor tissue.
+
+> Q1. What are the tumor specific amino-acids?
+
+```{r}
+library(bio3d)
+
+seqs <- read.fasta("lecture18_sequences.fa")
+seqs
+```
+
+Q2: Identify 9-mer peptides in the identified sequence regions unique to the tumor that can be potentially presented to T cells. 
+```{r}
+## Calculate positional identity scores
+ide <- conserv(seqs$ali, method="identity")
+mutant.sites <- which(ide < 1) 
+
+## Exclude gap possitions from analysis
+gaps <- gap.inspect(seqs)
+mutant.sites <- mutant.sites[mutant.sites %in% gaps$f.inds]
+
+mutant.sites
+```
+
+Find the -8 before and +8 after (i.e. the sequence segment containing all possible 9-mer sequences with a tumor specific amino-acid)
+```{r}
+start.position <- mutant.sites - 8
+end.position <- mutant.sites + 8
+```
+
+```{r}
+seqs$ali[ , start.position[1]:end.position[1]]
+```
+
+
+
+```{r}
+## Make a "names" label for our output sequences (one per mutant)
+mutant.names <- paste0(seqs$ali["P53_wt",mutant.sites],
+                       mutant.sites,
+                       seqs$ali["P53_mutant",mutant.sites])
+
+mutant.names
+```
+
+```{r}
+# Blank matrix to store sub-sequences
+store.seqs <- matrix("-", nrow=length(mutant.sites), ncol=17)
+rownames(store.seqs) <- mutant.names
+
+## Extract each sub-sequence
+for(i in 1:length(mutant.sites)) {
+  store.seqs[i,] <- seqs$ali["P53_mutant",start.position[i]:end.position[i]]
+}
+
+store.seqs
+```
+
+
+```{r}
+write.fasta(seqs=store.seqs,
+            ids = mutant.names,
+            file="mutantseqs.fa", gap=FALSE)
+```
